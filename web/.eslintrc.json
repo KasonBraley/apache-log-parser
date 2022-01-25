@@ -1,0 +1,11 @@
+{
+    "extends": [
+        "eslint:recommended",
+        "next",
+        "prettier"
+    ],
+    "env": {
+        "es6": true,
+        "browser": true
+    }
+}
