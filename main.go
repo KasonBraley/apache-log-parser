@@ -7,26 +7,33 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 // Represents some of the values of a line in a Common Apache log
 type LogLine struct {
-	remoteHost  string
-	datetime    time.Time
+	gorm.Model
+	RemoteHost  string
+	DateTime    time.Time
 	Method      string
-	route       string
-	status      int
-	httpVersion int
+	Route       string
+	Status      int
+	HTTPVersion int
 }
 
 func main() {
-	// parse("logs/apache.log")
-	setupHTTP()
+	content, _ := readLogFile("logs/apache.log")
+	parsed, _ := parseLog(content)
+	storeData(parsed)
+
+	// setupHTTP()
 }
 
 func CORSMiddleware() gin.HandlerFunc {
@@ -159,12 +166,12 @@ func parseLog(lines []string) ([]LogLine, error) {
 		}
 
 		lineData := LogLine{
-			remoteHost:  remoteHost,
-			datetime:    datetime,
+			RemoteHost:  remoteHost,
+			DateTime:    datetime,
 			Method:      method,
-			route:       route,
-			status:      status,
-			httpVersion: httpVersion,
+			Route:       route,
+			Status:      status,
+			HTTPVersion: httpVersion,
 		}
 
 		items = append(items, lineData)
@@ -172,4 +179,34 @@ func parseLog(lines []string) ([]LogLine, error) {
 
 	return items, nil
 }
+
+func storeData(logLines []LogLine) {
+	dsn := "host=localhost user=kason password=pass dbname=apache_logs port=5432 sslmode=disable TimeZone=Asia/Shanghai"
+
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect database")
+	}
+
+	// Migrate the schema
+	db.AutoMigrate(&LogLine{})
+
+	for _, line := range logLines {
+		db.Create(&line)
+	}
+
+}
+
+func readLogFile(file string) ([]string, error) {
+	f, err := os.Open(file)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	var lines []string
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	return lines, scanner.Err()
 }
