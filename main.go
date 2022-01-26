@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -87,28 +87,35 @@ func uploadHandler(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Println(file.Filename)
-	f, err := file.Open()
-	if err != nil {
-		log.Fatalf("unable to open uploaded file %s", err)
-	}
-	defer f.Close()
 
-	out, err := os.Create("uploadedfile")
+	content, err := readLog(file)
 	if err != nil {
-		log.Fatalf("unable to create file %s", err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": "Unable to open and read log",
+		})
+		return
 	}
-	defer out.Close()
-	_, err = io.Copy(out, f)
+
+	logLines, err := parseLog(content)
 	if err != nil {
-		log.Fatalf("unable to copy to file %s", err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": "Unable to parse values from the log",
+		})
+		return
 	}
+
+	for _, line := range logLines {
+		fmt.Println(line.Method)
+	}
+
+	c.JSON(200, "")
 }
 
-func readLogFile(file string) ([]string, error) {
-	f, err := os.Open(file)
+func readLog(file *multipart.FileHeader) ([]string, error) {
+	f, err := file.Open()
 	if err != nil {
-		return nil, err
+		log.Printf("unable to open uploaded file %s", err)
+		return []string{}, err
 	}
 	defer f.Close()
 
@@ -117,16 +124,12 @@ func readLogFile(file string) ([]string, error) {
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
+
 	return lines, scanner.Err()
 }
 
-func parse(file string) []LogLine {
+func parseLog(lines []string) ([]LogLine, error) {
 	var items []LogLine
-
-	lines, err := readLogFile(file)
-	if err != nil {
-		log.Fatalf("read lines %s", err)
-	}
 
 	for _, line := range lines {
 
@@ -137,19 +140,22 @@ func parse(file string) []LogLine {
 
 		status, err := strconv.Atoi(fields[8])
 		if err != nil {
-			log.Fatalf("Unable to convert status code to int %s", err)
+			log.Printf("Unable to convert status code to int %s", err)
+			return []LogLine{}, err
 		}
 
 		layout := "02/Jan/2006:15:04:05 -0700"
 		value := strings.Trim(fields[3], "[") + " " + strings.Trim(fields[4], "]")
 		datetime, err := time.Parse(layout, value)
 		if err != nil {
-			fmt.Printf("unable to parse date %s", err)
+			log.Printf("unable to parse date %s", err)
+			return []LogLine{}, err
 		}
 
 		httpVersion, err := strconv.Atoi(strings.Trim(fields[7], "HTTP/.0\""))
 		if err != nil {
-			log.Fatalf("Unable to convert http Version string to int %s", err)
+			log.Printf("Unable to convert http Version string to int %s", err)
+			return []LogLine{}, err
 		}
 
 		lineData := LogLine{
@@ -164,6 +170,6 @@ func parse(file string) []LogLine {
 		items = append(items, lineData)
 	}
 
-	// fmt.Println(items)
-	return items
+	return items, nil
+}
 }
