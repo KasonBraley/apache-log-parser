@@ -3,28 +3,109 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Represents some of the values of a line in a Common Apache log
 type LogLine struct {
 	remoteHost  string
 	datetime    time.Time
-	method      string
+	Method      string
 	route       string
 	status      int
 	httpVersion int
 }
 
 func main() {
-	parse("logs/apache.log")
+	// parse("logs/apache.log")
+	setupHTTP()
 }
 
-func readLog(file string) ([]string, error) {
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
+}
+
+func setupHTTP() {
+	r := gin.Default()
+
+	r.Use(CORSMiddleware())
+
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
+
+	r.GET("/", handler)
+	r.POST("/", parseHandler)
+	r.POST("/upload", uploadHandler)
+
+	r.Run(":5000")
+}
+
+func handler(c *gin.Context) {
+	c.JSON(200, "Get DATA")
+}
+
+func parseHandler(c *gin.Context) {
+
+	body, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		log.Fatalf("unable to read request body %s", err)
+	}
+
+	fmt.Print(string(body))
+}
+
+func uploadHandler(c *gin.Context) {
+	file, err := c.FormFile("file")
+
+	// The file cannot be received.
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": "No file is received",
+		})
+		return
+	}
+	fmt.Println(file.Filename)
+	f, err := file.Open()
+	if err != nil {
+		log.Fatalf("unable to open uploaded file %s", err)
+	}
+	defer f.Close()
+
+	out, err := os.Create("uploadedfile")
+	if err != nil {
+		log.Fatalf("unable to create file %s", err)
+	}
+	defer out.Close()
+	_, err = io.Copy(out, f)
+	if err != nil {
+		log.Fatalf("unable to copy to file %s", err)
+	}
+}
+
+func readLogFile(file string) ([]string, error) {
 	f, err := os.Open(file)
 	if err != nil {
 		return nil, err
@@ -42,7 +123,7 @@ func readLog(file string) ([]string, error) {
 func parse(file string) []LogLine {
 	var items []LogLine
 
-	lines, err := readLog(file)
+	lines, err := readLogFile(file)
 	if err != nil {
 		log.Fatalf("read lines %s", err)
 	}
@@ -74,7 +155,7 @@ func parse(file string) []LogLine {
 		lineData := LogLine{
 			remoteHost:  remoteHost,
 			datetime:    datetime,
-			method:      method,
+			Method:      method,
 			route:       route,
 			status:      status,
 			httpVersion: httpVersion,
@@ -83,6 +164,6 @@ func parse(file string) []LogLine {
 		items = append(items, lineData)
 	}
 
-	fmt.Println(items)
+	// fmt.Println(items)
 	return items
 }
