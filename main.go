@@ -31,7 +31,9 @@ type LogLine struct {
 func main() {
 	content, _ := readLogFile("logs/apache.log")
 	parsed, _ := parseLog(content)
-	storeData(parsed)
+	db := connectDB()
+	storeData(db, parsed)
+	retrieveAllRowsFromDB(db)
 
 	// setupHTTP()
 }
@@ -180,13 +182,18 @@ func parseLog(lines []string) ([]LogLine, error) {
 	return items, nil
 }
 
-func storeData(logLines []LogLine) {
+func connectDB() *gorm.DB {
 	dsn := "host=localhost user=kason password=pass dbname=apache_logs port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
+
+	return db
+}
+
+func storeData(db *gorm.DB, logLines []LogLine) {
 
 	// Migrate the schema
 	db.AutoMigrate(&LogLine{})
@@ -209,4 +216,13 @@ func readLogFile(file string) ([]string, error) {
 		lines = append(lines, scanner.Text())
 	}
 	return lines, scanner.Err()
+}
+
+func retrieveAllRowsFromDB(db *gorm.DB) []LogLine {
+	var logLines []LogLine
+
+	// Get all records
+	db.Find(&logLines)
+
+	return logLines
 }
