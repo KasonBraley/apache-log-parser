@@ -51,8 +51,7 @@ export default function BarChart() {
                     data.POST,
                     data.PUT,
                 ],
-                // data: [1, 2, 3, 1, 10],
-                backgroundColor: "rgba(255, 99, 132, 0.5)",
+                backgroundColor: "rgba(122, 75, 208, 1)",
             },
         ],
     }
