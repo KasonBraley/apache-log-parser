@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -66,7 +65,6 @@ func setupHTTP() {
 	})
 
 	r.GET("/", handler)
-	r.POST("/", parseHandler)
 	r.POST("/upload", uploadHandler)
 
 	r.Run(":5000")
@@ -74,16 +72,6 @@ func setupHTTP() {
 
 func handler(c *gin.Context) {
 	c.JSON(200, "Get DATA")
-}
-
-func parseHandler(c *gin.Context) {
-
-	body, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		log.Fatalf("unable to read request body %s", err)
-	}
-
-	fmt.Print(string(body))
 }
 
 func uploadHandler(c *gin.Context) {
