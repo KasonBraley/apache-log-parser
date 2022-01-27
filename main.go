@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -28,13 +27,7 @@ type LogLine struct {
 }
 
 func main() {
-	content, _ := readLogFile("logs/apache.log")
-	parsed, _ := parseLog(content)
-	db := connectDB()
-	storeData(db, parsed)
-	retrieveAllRowsFromDB(db)
-
-	// setupHTTP()
+	setupHTTP()
 }
 
 func CORSMiddleware() gin.HandlerFunc {
@@ -64,14 +57,19 @@ func setupHTTP() {
 		})
 	})
 
-	r.GET("/", handler)
+	r.GET("/", retrieveDataHandler)
 	r.POST("/upload", uploadHandler)
 
 	r.Run(":5000")
 }
 
-func handler(c *gin.Context) {
-	c.JSON(200, "Get DATA")
+func retrieveDataHandler(c *gin.Context) {
+	db := connectDB()
+	logLines := retrieveAllRowsFromDB(db)
+
+	c.JSON(200, gin.H{
+		"data": logLines,
+	})
 }
 
 func uploadHandler(c *gin.Context) {
@@ -101,9 +99,8 @@ func uploadHandler(c *gin.Context) {
 		return
 	}
 
-	for _, line := range logLines {
-		fmt.Println(line.Method)
-	}
+	db := connectDB()
+	storeData(db, logLines)
 
 	c.JSON(200, "")
 }
