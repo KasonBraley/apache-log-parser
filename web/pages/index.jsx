@@ -14,7 +14,7 @@ export default function Home() {
 
     function handleSubmit(e) {
         e.preventDefault()
-        sendData("http://localhost:5000/upload", file)
+        sendData("http://localhost:4002/upload", file)
         logInputRef.current.value = "" //Resets the file name of the file input
     }
 

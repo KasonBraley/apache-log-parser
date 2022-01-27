@@ -18,7 +18,7 @@ export default function BarChart() {
 
     useEffect(() => {
         async function getData() {
-            const response = await fetch("http://localhost:5000/")
+            const response = await fetch("http://localhost:4003/retrieve")
             if (response.ok) {
                 let resp = await response.json()
                 console.log(resp)
