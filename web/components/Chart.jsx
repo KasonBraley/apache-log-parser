@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { Bar } from "react-chartjs-2"
 import {
     Chart as ChartJS,
@@ -13,18 +13,50 @@ import {
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 export default function BarChart() {
-    const labels = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"]
+    const labels = ["DELETE", "GET", "HEAD", "PATCH", "POST", "PUT"]
+    let [data, setData] = useState()
 
-    const data = {
+    useEffect(() => {
+        async function getData() {
+            const response = await fetch("http://localhost:5000/")
+            if (response.ok) {
+                let resp = await response.json()
+                console.log(resp)
+                let methods = resp.data.map((log) => log.Method)
+
+                var map = methods.reduce(function (prev, cur) {
+                    prev[cur] = (prev[cur] || 0) + 1
+                    return prev
+                }, {})
+
+                setData(map)
+            } else {
+                console.log("ERROR fetching the database data")
+            }
+        }
+
+        getData()
+    }, [])
+
+    const chartData = {
         labels,
         datasets: [
             {
                 label: "Methods",
-                data: [1, 2, 3, 1, 10],
+                data: data && [
+                    data.DELETE,
+                    data.GET,
+                    data.HEAD,
+                    data.PATCH,
+                    data.POST,
+                    data.PUT,
+                ],
+                // data: [1, 2, 3, 1, 10],
                 backgroundColor: "rgba(255, 99, 132, 0.5)",
             },
         ],
     }
+
     const options = {
         responsive: true,
         plugins: {
@@ -38,5 +70,5 @@ export default function BarChart() {
         },
     }
 
-    return <Bar options={options} data={data} />
+    return <Bar options={options} data={chartData} />
 }
