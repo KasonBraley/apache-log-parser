@@ -21,10 +21,12 @@ type LogLine struct {
 }
 
 func RegisterHandlers() {
-	http.HandleFunc("/retrieve", retrieveDataHandler)
+	handler := new(LogLine)
+
+	http.Handle("/retrieve", handler)
 }
 
-func retrieveDataHandler(w http.ResponseWriter, r *http.Request) {
+func (l LogLine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	db := connectDB()
 	logLines := retrieveAllRowsFromDB(db)
 

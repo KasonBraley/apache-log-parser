@@ -26,10 +26,12 @@ type LogLine struct {
 }
 
 func RegisterHandlers() {
-	http.HandleFunc("/upload", uploadHandler)
+	handler := new(LogLine)
+
+	http.Handle("/upload", handler)
 }
 
-func uploadHandler(w http.ResponseWriter, r *http.Request) {
+func (l LogLine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(32 << 20)
 	file, fileHeader, err := r.FormFile("file")
 
