@@ -19,6 +19,9 @@ func main() {
 	var r registry.Registration
 	r.ServiceName = registry.LogService
 	r.ServiceURL = serviceAddress
+	// does not require any services
+	r.RequiredServices = make([]registry.ServiceName, 0)
+	r.ServiceUpdateURL = r.ServiceURL + "/services"
 
 	ctx, err := service.Start(context.Background(), host, port, r, logger.RegisterHandlers)
 	if err != nil {
