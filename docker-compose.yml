@@ -1,0 +1,71 @@
+version: "3"
+
+services:
+  database:
+    image: "postgres:latest"
+    restart: always
+    environment:
+      - POSTGRES_USER=kason
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=apache_logs
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  web:
+    ports:
+      - 3000:3000
+    build:
+      context: ./web
+
+  dependencies:
+    build:
+      dockerfile: dependencies.Dockerfile
+      context: .
+
+  registry:
+    ports:
+      - 4000:4000
+    tty: true
+    depends_on:
+      - dependencies
+    build:
+      context: ./cmd/registryservice
+
+  logger:
+    depends_on:
+      - registry
+      - dependencies
+    ports:
+      - 4001:4001
+    tty: true
+    build:
+      context: ./cmd/logservice
+
+  parser:
+    depends_on:
+      - registry
+      - database
+      - dependencies
+    ports:
+      - 4002:4002
+    tty: true
+    environment:
+      POSTGRES_HOST: database
+      POSTGRES_PORT: 5432
+    build:
+      context: ./cmd/parseservice
+
+  retrievedata:
+    depends_on:
+      - registry
+      - database
+      - dependencies
+    ports:
+      - 4003:4003
+    build:
+      context: ./cmd/retrievedataservice
+
+volumes:
+  pgdata:

@@ -7,12 +7,14 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"sync"
 )
 
 // move to config file or .env
 const ServerPort = ":4000"
-const ServicesURL = "http://localhost" + ServerPort + "/services"
+
+var ServicesURL = fmt.Sprintf("http://%s%s/services", os.Getenv("HOST"), ServerPort)
 
 type registry struct {
 	registrations []Registration

@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
+	"os"
 	"sync"
 )
 
@@ -25,6 +26,7 @@ func RegisterService(r Registration) error {
 		return err
 	}
 
+	var ServicesURL = fmt.Sprintf("http://%s%s/services", os.Getenv("HOST"), ServerPort)
 	res, err := http.Post(ServicesURL, "application/json", buf)
 	if err != nil {
 		return err
