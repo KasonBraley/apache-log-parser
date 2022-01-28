@@ -22,7 +22,7 @@ export default function BarChart() {
             if (response.ok) {
                 let resp = await response.json()
                 console.log(resp)
-                let methods = resp.data.map((log) => log.Method)
+                let methods = resp.map((log) => log.Method)
 
                 var map = methods.reduce(function (prev, cur) {
                     prev[cur] = (prev[cur] || 0) + 1

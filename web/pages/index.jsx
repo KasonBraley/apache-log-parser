@@ -29,7 +29,7 @@ export default function Home() {
         })
 
         if (response.ok) {
-            console.log(await response.json())
+            console.log(await response.text())
         }
     }
 
