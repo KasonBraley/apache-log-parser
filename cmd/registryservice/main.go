@@ -32,5 +32,5 @@ func main() {
 	}()
 
 	<-ctx.Done()
-	fmt.Println("Shutting down registy service")
+	fmt.Println("Shutting down registry service")
 }
