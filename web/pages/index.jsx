@@ -1,12 +1,58 @@
 import Head from "next/head"
-import React, { useState } from "react"
-import BarChart from "../components/Chart"
+import React, { useEffect, useState } from "react"
+import BarChart from "../components/Chart/Chart"
 import Table from "../components/Table"
 
 export default function Home() {
     const [file, setFile] = useState()
     const [view, setView] = useState("chart")
     const logInputRef = React.useRef()
+
+    let [methods, setMethods] = useState()
+    let [statusCodes, setStatusCodes] = useState()
+    let [httpVersions, setHttpVersions] = useState()
+
+    useEffect(() => {
+        async function getData() {
+            const response = await fetch("http://localhost:4003/retrieve")
+            if (response.ok) {
+                let resp = await response.json()
+                console.log(resp)
+                let methods = []
+                let statusCodes = []
+                let httpVersion = []
+
+                resp.map((log) => {
+                    methods.push(log.Method)
+                    statusCodes.push(log.Status)
+                    httpVersion.push(log.HTTPVersion)
+                })
+
+                let map = methods.reduce(function (prev, cur) {
+                    prev[cur] = (prev[cur] || 0) + 1
+                    return prev
+                }, {})
+
+                let map2 = statusCodes.reduce(function (prev, cur) {
+                    prev[cur] = (prev[cur] || 0) + 1
+                    return prev
+                }, {})
+
+                let map3 = httpVersion.reduce(function (prev, cur) {
+                    prev[cur] = (prev[cur] || 0) + 1
+                    return prev
+                }, {})
+
+                setMethods(map)
+                setStatusCodes(map2)
+                setHttpVersions(map3)
+            } else {
+                console.log("ERROR fetching the database data")
+            }
+        }
+
+        getData()
+    }, [])
 
     function handleChange(event) {
         setFile(event.target.files[0])
@@ -87,7 +133,15 @@ export default function Home() {
                 </div>
 
                 <div className="w-[600px]">
-                    {view === "chart" ? <BarChart /> : <Table />}
+                    {view === "chart" ? (
+                        <>
+                            <BarChart type="methods" data={methods} />
+                            <BarChart type="statusCodes" data={statusCodes} />
+                            <BarChart type="httpVersions" data={httpVersions} />
+                        </>
+                    ) : (
+                        <Table />
+                    )}
                 </div>
             </main>
         </>
