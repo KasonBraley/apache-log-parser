@@ -40,7 +40,7 @@ export default function Home() {
                 <meta name="Apache Log Parser and Aggregator" />
             </Head>
 
-            <main className="flex justify-center items-center min-h-screen min-w-full space-x-60">
+            <main className="flex flex-col 2xl:flex 2xl:flex-row justify-center items-center min-h-screen min-w-full space-y-40 2xl:space-y-0 2xl:space-x-52">
                 {/* <span>Example Apache Common log line</span> */}
                 {/* <p> */}
                 {/*     { */}
@@ -50,7 +50,7 @@ export default function Home() {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="border-2 border-black border-solid p-4 rounded-md shadow-xl shadow-violet-500/50"
+                    className="w-64 2xl:w-96 border-2 border-black border-solid p-4 rounded-md shadow-xl shadow-violet-500/50"
                 >
                     <h1 className="text-lg mb-4">Apache Log Upload</h1>
                     <label className="block">
@@ -78,7 +78,7 @@ export default function Home() {
                     </button>
                 </form>
 
-                <div className="tabs tabs-boxed">
+                <div className="w-36 tabs tabs-boxed">
                     <a
                         onClick={() => setView("chart")}
                         className={view === "chart" ? "tab tab-active" : "tab"}

@@ -33,7 +33,7 @@ Ports:
 
 - [ ] Figure out connection to Postgres container from the other container services (env var issues / flaky)
 - [ ] Deploy to ECS with CI/CD
-- [ ] Setup breakpoints in Tailwind for different screen sizes
+- [x] Setup breakpoints in Tailwind for different screen sizes
 - [ ] Add authentication. Try AWS Cognito
 - [ ] Aggregate more data into the below chart. Currently it is only rendering the count of methods,
   however all the other data is ready to be displayed as well, just needs to be hooked up to the chart.
