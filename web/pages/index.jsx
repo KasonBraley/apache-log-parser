@@ -41,13 +41,6 @@ export default function Home() {
             </Head>
 
             <main className="flex flex-col 2xl:flex 2xl:flex-row justify-center items-center min-h-screen min-w-full space-y-40 2xl:space-y-0 2xl:space-x-52">
-                {/* <span>Example Apache Common log line</span> */}
-                {/* <p> */}
-                {/*     { */}
-                {/*         '132.128.161.195 - - [25/Jan/2022:20:08:53 -0700] "HEAD /synergize/deploy/cutting-edge/convergence HTTP/2.0" 301 14575' */}
-                {/*     } */}
-                {/* </p> */}
-
                 <form
                     onSubmit={handleSubmit}
                     className="w-64 2xl:w-96 border-2 border-black border-solid p-4 rounded-md shadow-xl shadow-violet-500/50"
