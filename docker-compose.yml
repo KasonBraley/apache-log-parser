@@ -23,6 +23,7 @@ services:
     build:
       dockerfile: dependencies.Dockerfile
       context: .
+    image: dependencies
 
   registry:
     ports:
@@ -59,9 +60,9 @@ services:
 
   retrievedata:
     depends_on:
+      - dependencies
       - registry
       - database
-      - dependencies
     ports:
       - 4003:4003
     build:
