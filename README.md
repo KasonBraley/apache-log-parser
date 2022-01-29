@@ -44,7 +44,7 @@ Ports:
 
 #### Current look
 
-![website](./docs/website.png)
+![website](./docs/homepage.png)
 
 #### Wireframe
 
