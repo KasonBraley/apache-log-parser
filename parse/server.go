@@ -6,7 +6,6 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -126,8 +125,8 @@ func readLog(file *multipart.FileHeader) ([]string, error) {
 }
 
 func connectDB() *gorm.DB {
-	host := os.Getenv("POSTGRES_HOST")
-	dsn := fmt.Sprintf("host=%s user=kason password=pass dbname=apache_logs port=5432 sslmode=disable TimeZone=Asia/Shanghai", host)
+	// dsn := fmt.Sprintf("host=%s user=kason password=pass dbname=apache_logs port=5432 sslmode=disable TimeZone=Asia/Shanghai", host)
+	dsn := "host=database user=kason password=pass dbname=apache_logs port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {

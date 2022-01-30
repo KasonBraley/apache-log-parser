@@ -13,7 +13,7 @@ func main() {
 	logger.Run("./app.log")
 
 	// bring in from config file / env
-	host, port := "localhost", "4001"
+	host, port := "logger", "4001"
 	serviceAddress := fmt.Sprintf("http://%v:%v", host, port)
 
 	var r registry.Registration

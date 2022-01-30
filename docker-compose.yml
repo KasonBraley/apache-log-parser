@@ -36,8 +36,8 @@ services:
 
   logger:
     depends_on:
-      - registry
       - dependencies
+      - registry
     ports:
       - 4001:4001
     tty: true
@@ -46,15 +46,13 @@ services:
 
   parser:
     depends_on:
-      - registry
-      - database
       - dependencies
+      - registry
+      - logger
+      - database
     ports:
       - 4002:4002
     tty: true
-    environment:
-      POSTGRES_HOST: database
-      POSTGRES_PORT: 5432
     build:
       context: ./cmd/parseservice
 
@@ -62,9 +60,11 @@ services:
     depends_on:
       - dependencies
       - registry
+      - logger
       - database
     ports:
       - 4003:4003
+    tty: true
     build:
       context: ./cmd/retrievedataservice
 

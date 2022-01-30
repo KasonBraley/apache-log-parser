@@ -12,7 +12,7 @@ import (
 
 func main() {
 	// bring in from config file / env
-	host, port := "localhost", "4003"
+	host, port := "retrievedata", "4003"
 	serviceAddress := fmt.Sprintf("http://%v:%v", host, port)
 
 	var r registry.Registration

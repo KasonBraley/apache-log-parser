@@ -31,7 +31,7 @@ Ports:
 
 ##### Still left TODO (probably in order):
 
-- [ ] Figure out connection to Postgres container from the other container services (env var issues / flaky)
+- [x] Figure out connection to Postgres container from the other container services (env var issues / flaky)
 - [ ] Deploy to ECS with CI/CD
 - [x] Setup breakpoints in Tailwind for different screen sizes
 - [ ] Add authentication. Try AWS Cognito

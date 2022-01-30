@@ -24,7 +24,7 @@ func main() {
 	}()
 
 	go func() {
-		fmt.Println("Registry service started. Press any key to stop.")
+		fmt.Println("Registry Service started. Press any key to stop.")
 		var s string
 		fmt.Scanln(&s)
 		srv.Shutdown(ctx)

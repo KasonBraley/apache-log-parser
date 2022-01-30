@@ -36,7 +36,7 @@ func (l LogLine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func connectDB() *gorm.DB {
-	dsn := "host=localhost user=kason password=pass dbname=apache_logs port=5432 sslmode=disable TimeZone=Asia/Shanghai"
+	dsn := "host=database user=kason password=pass dbname=apache_logs port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
