@@ -1,4 +1,4 @@
-FROM dependencies AS builder
+FROM kbraley/log-parser-dependencies AS builder
 # Copy the application source code.
 COPY ./ /go/src/app/retrievedataservice
 

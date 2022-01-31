@@ -19,24 +19,16 @@ services:
     build:
       context: ./web
 
-  dependencies:
-    build:
-      dockerfile: dependencies.Dockerfile
-      context: .
-    image: dependencies
 
   registry:
     ports:
       - 4000:4000
     tty: true
-    depends_on:
-      - dependencies
     build:
       context: ./cmd/registryservice
 
   logger:
     depends_on:
-      - dependencies
       - registry
     ports:
       - 4001:4001
@@ -46,7 +38,6 @@ services:
 
   parser:
     depends_on:
-      - dependencies
       - registry
       - logger
       - database
@@ -58,7 +49,6 @@ services:
 
   retrievedata:
     depends_on:
-      - dependencies
       - registry
       - logger
       - database

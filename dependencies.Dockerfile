@@ -1,6 +1,5 @@
-FROM golang:1.17 AS dep
+FROM golang:1.17
 # Add the module files and download dependencies.
-ENV GO111MODULE=on
 COPY ./go.mod /go/src/app/go.mod
 COPY ./go.sum /go/src/app/go.sum
 WORKDIR /go/src/app
