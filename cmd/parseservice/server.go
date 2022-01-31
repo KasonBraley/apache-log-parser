@@ -1,4 +1,4 @@
-package parse
+package main
 
 import (
 	"bufio"
@@ -15,7 +15,7 @@ import (
 )
 
 // Represents some of the values of a line in a Common Apache log
-type LogLine struct {
+type logLine struct {
 	gorm.Model
 	RemoteHost  string
 	DateTime    time.Time
@@ -25,13 +25,13 @@ type LogLine struct {
 	HTTPVersion int
 }
 
-func RegisterHandlers() {
-	handler := new(LogLine)
+func registerHandlers() {
+	handler := new(logLine)
 
 	http.Handle("/upload", handler)
 }
 
-func (l LogLine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (l logLine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(32 << 20)
 	file, fileHeader, err := r.FormFile("file")
 
@@ -62,8 +62,8 @@ func (l LogLine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "File uploaded and parsed")
 }
 
-func parseLog(lines []string) ([]LogLine, error) {
-	var items []LogLine
+func parseLog(lines []string) ([]logLine, error) {
+	var items []logLine
 
 	for _, line := range lines {
 
@@ -75,7 +75,7 @@ func parseLog(lines []string) ([]LogLine, error) {
 		status, err := strconv.Atoi(fields[8])
 		if err != nil {
 			log.Printf("Unable to convert status code to int %s", err)
-			return []LogLine{}, err
+			return []logLine{}, err
 		}
 
 		layout := "02/Jan/2006:15:04:05 -0700"
@@ -83,16 +83,16 @@ func parseLog(lines []string) ([]LogLine, error) {
 		datetime, err := time.Parse(layout, value)
 		if err != nil {
 			log.Printf("unable to parse date %s", err)
-			return []LogLine{}, err
+			return []logLine{}, err
 		}
 
 		httpVersion, err := strconv.Atoi(strings.Trim(fields[7], "HTTP/.0\""))
 		if err != nil {
 			log.Printf("Unable to convert http Version string to int %s", err)
-			return []LogLine{}, err
+			return []logLine{}, err
 		}
 
-		lineData := LogLine{
+		lineData := logLine{
 			RemoteHost:  remoteHost,
 			DateTime:    datetime,
 			Method:      method,
@@ -136,10 +136,10 @@ func connectDB() *gorm.DB {
 	return db
 }
 
-func storeData(db *gorm.DB, logLines []LogLine) {
+func storeData(db *gorm.DB, logLines []logLine) {
 
 	// Migrate the schema
-	db.AutoMigrate(&LogLine{})
+	db.AutoMigrate(&logLine{})
 
 	for _, line := range logLines {
 		db.Create(&line)

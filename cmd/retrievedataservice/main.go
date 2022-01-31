@@ -3,7 +3,6 @@ package main
 import (
 	"apache-log-parser/logger"
 	"apache-log-parser/registry"
-	"apache-log-parser/retrieve"
 	"apache-log-parser/service"
 	"context"
 	"fmt"
@@ -21,7 +20,7 @@ func main() {
 	r.RequiredServices = []registry.ServiceName{registry.LogService}
 	r.ServiceUpdateURL = r.ServiceURL + "/services"
 
-	ctx, err := service.Start(context.Background(), host, port, r, retrieve.RegisterHandlers)
+	ctx, err := service.Start(context.Background(), host, port, r, registerHandlers)
 	if err != nil {
 		log.Fatal(err)
 	}

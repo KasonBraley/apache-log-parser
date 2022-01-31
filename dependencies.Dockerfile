@@ -6,7 +6,5 @@ WORKDIR /go/src/app
 RUN go mod download
 # Add the shared packages.
 COPY ./logger /go/src/app/logger
-COPY ./parse /go/src/app/parse
 COPY ./registry /go/src/app/registry
-COPY ./retrieve /go/src/app/retrieve
 COPY ./service /go/src/app/service

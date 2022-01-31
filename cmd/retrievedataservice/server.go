@@ -1,4 +1,4 @@
-package retrieve
+package main
 
 import (
 	"encoding/json"
@@ -10,7 +10,7 @@ import (
 )
 
 // Represents some of the values of a line in a Common Apache log
-type LogLine struct {
+type logLine struct {
 	gorm.Model
 	RemoteHost  string
 	DateTime    time.Time
@@ -20,13 +20,13 @@ type LogLine struct {
 	HTTPVersion int
 }
 
-func RegisterHandlers() {
-	handler := new(LogLine)
+func registerHandlers() {
+	handler := new(logLine)
 
 	http.Handle("/retrieve", handler)
 }
 
-func (l LogLine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (l logLine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	db := connectDB()
 	logLines := retrieveAllRowsFromDB(db)
 
@@ -46,8 +46,8 @@ func connectDB() *gorm.DB {
 	return db
 }
 
-func retrieveAllRowsFromDB(db *gorm.DB) []LogLine {
-	var logLines []LogLine
+func retrieveAllRowsFromDB(db *gorm.DB) []logLine {
+	var logLines []logLine
 
 	// Get all records
 	db.Find(&logLines)
