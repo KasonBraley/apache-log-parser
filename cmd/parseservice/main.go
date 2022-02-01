@@ -5,22 +5,24 @@ import (
 	"apache-log-parser/registry"
 	"apache-log-parser/service"
 	"context"
+	"flag"
 	"fmt"
 	"log"
 )
 
 func main() {
-	// bring in from config file / env
-	host, port := "parser", "4002"
-	serviceAddress := fmt.Sprintf("http://%v:%v", host, port)
+	// Define command-line flags
+	serverHost := flag.String("serverHost", "localhost", "HTTP server host name")
+	serverPort := flag.Int("serverPort", 4002, "HTTP server network port")
+	flag.Parse()
 
 	var r registry.Registration
 	r.ServiceName = registry.ParseService
-	r.ServiceURL = serviceAddress
+	r.ServiceURL = fmt.Sprintf("http://%v:%v", *serverHost, *serverPort)
 	r.RequiredServices = []registry.ServiceName{registry.LogService}
 	r.ServiceUpdateURL = r.ServiceURL + "/services"
 
-	ctx, err := service.Start(context.Background(), host, port, r, registerHandlers)
+	ctx, err := service.Start(context.Background(), *serverHost, *serverPort, r, registerHandlers)
 	if err != nil {
 		log.Fatal(err)
 	}

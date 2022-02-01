@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func Start(ctx context.Context, host, port string, reg registry.Registration, registerHandlersFunc func()) (context.Context, error) {
+func Start(ctx context.Context, host string, port int, reg registry.Registration, registerHandlersFunc func()) (context.Context, error) {
 	registerHandlersFunc()
 	ctx = startService(ctx, reg.ServiceName, host, port)
 
@@ -20,11 +20,11 @@ func Start(ctx context.Context, host, port string, reg registry.Registration, re
 	return ctx, nil
 }
 
-func startService(ctx context.Context, serviceName registry.ServiceName, host, port string) context.Context {
+func startService(ctx context.Context, serviceName registry.ServiceName, host string, port int) context.Context {
 	ctx, cancel := context.WithCancel(ctx)
 
 	var srv http.Server
-	srv.Addr = ":" + port
+	srv.Addr = fmt.Sprintf(":%v", port)
 
 	go func() {
 		log.Println(srv.ListenAndServe())
