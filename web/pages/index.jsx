@@ -14,7 +14,7 @@ export default function Home() {
 
     useEffect(() => {
         async function getData() {
-            const response = await fetch("http://localhost:4003/retrieve")
+            const response = await fetch("http://localhost:4001/retrieve")
             if (response.ok) {
                 let resp = await response.json()
                 console.log(resp)
@@ -60,7 +60,7 @@ export default function Home() {
 
     function handleSubmit(e) {
         e.preventDefault()
-        sendData("http://localhost:4002/upload", file)
+        sendData("http://localhost:4000/upload", file)
         logInputRef.current.value = "" //Resets the file name of the file input
     }
 

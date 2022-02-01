@@ -14,52 +14,27 @@ services:
   web:
     ports:
       - 3000:3000
-    build:
-      context: ./web
+    # build:
+    #   context: ./web
     image: kbraley/log-parser-web
-
-
-  registry:
-    ports:
-      - 4000:4000
-    tty: true
-    build:
-      context: ./cmd/registryservice
-    image: kbraley/log-parser-registry
-
-  logger:
-    depends_on:
-      - registry
-    ports:
-      - 4001:4001
-    tty: true
-    build:
-      context: ./cmd/logservice
-    image: kbraley/log-parser-logger
 
   parser:
     depends_on:
-      - registry
-      - logger
       - database
     ports:
-      - 4002:4002
-    tty: true
-    build:
-      context: ./cmd/parseservice
+      - 4000:4000
+    # build:
+    #   context: ./parser
     image: kbraley/log-parser-parser
 
-  retrievedata:
+  dataretrieval:
     depends_on:
-      - registry
-      - logger
       - database
     ports:
-      - 4003:4003
-    tty: true
-    build:
-      context: ./cmd/retrievedataservice
-    image: kbraley/log-parser-retrievedata
+      - 4001:4001
+    # build:
+    #   context: ./dataretrieval
+    image: kbraley/log-parser-dataretrieval
 
 volumes:
   pgdata:

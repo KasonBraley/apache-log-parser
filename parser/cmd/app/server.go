@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gorilla/mux"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -26,13 +27,15 @@ type logLine struct {
 	HTTPVersion float64
 }
 
-func registerHandlers() {
-	handler := new(logLine)
+func (l *logLine) routes() *mux.Router {
+	// Register handler functions.
+	r := mux.NewRouter()
+	r.HandleFunc("/upload", l.upload).Methods("POST")
 
-	http.Handle("/upload", handler)
+	return r
 }
 
-func (l logLine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (l logLine) upload(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(32 << 20)
 	file, fileHeader, err := r.FormFile("file")
 

@@ -15,10 +15,8 @@ Ports:
 
 - web: `3000`
 - database (**PostreSQL**): `5432`
-- registry service: `4000`
-- log service: `4001`
-- parser service: `4002`
-- data retrieval service: `4003`
+- parser service: `4000`
+- data retrieval service: `4001`
 
 ##### PostgreSQL Domain Model
 
