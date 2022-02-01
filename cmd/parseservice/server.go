@@ -39,6 +39,7 @@ func (l logLine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// The file cannot be received.
 	if err != nil {
 		http.Error(w, "The uploaded file is too big. Please choose an file that's less than 1MB in size", http.StatusBadRequest)
+		log.Println(err)
 		return
 	}
 	defer file.Close()
@@ -46,12 +47,14 @@ func (l logLine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	content, err := readLog(fileHeader)
 	if err != nil {
 		http.Error(w, "Unable to open and read the log", http.StatusBadRequest)
+		log.Println(err)
 		return
 	}
 
 	logLines, err := parseLog(content)
 	if err != nil {
 		http.Error(w, "Unable to parse values from the log", http.StatusBadRequest)
+		log.Println(err)
 		return
 	}
 
@@ -59,7 +62,7 @@ func (l logLine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	storeData(db, logLines)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.WriteHeader(201)
+	w.WriteHeader(http.StatusCreated)
 	fmt.Fprintf(w, "File uploaded and parsed")
 }
 
@@ -130,7 +133,6 @@ func readLog(file *multipart.FileHeader) ([]string, error) {
 }
 
 func connectDB() *gorm.DB {
-	// dsn := fmt.Sprintf("host=%s user=kason password=pass dbname=apache_logs port=5432 sslmode=disable TimeZone=Asia/Shanghai", host)
 	dsn := "host=database user=kason password=pass dbname=apache_logs port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
