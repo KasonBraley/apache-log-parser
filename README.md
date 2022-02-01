@@ -41,7 +41,7 @@ Ports:
 - [ ] Aggregate the data on the backend instead of the frontend to reduce traffic being sent
 - [ ] Add tests for the backend
 - [ ] Also render a table view of the same data
-- [ ] Parser seems broken on different files generated from [flog](https://github.com/mingrammer/flog)
+- [x] Parser seems broken on different files generated from [flog](https://github.com/mingrammer/flog)
 
 #### Current look
 

@@ -6,6 +6,7 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -22,7 +23,7 @@ type logLine struct {
 	Method      string
 	Route       string
 	Status      int
-	HTTPVersion int
+	HTTPVersion float64
 }
 
 func registerHandlers() {
@@ -86,7 +87,11 @@ func parseLog(lines []string) ([]logLine, error) {
 			return []logLine{}, err
 		}
 
-		httpVersion, err := strconv.Atoi(strings.Trim(fields[7], "HTTP/.0\""))
+		re := regexp.MustCompile(`([A-Z])\w+\/\d\.\d`)
+		found := re.Find([]byte(fields[7]))
+		trimmed := strings.Trim(string(found), "HTTP/")
+		httpVersion, err := strconv.ParseFloat(trimmed, 64)
+
 		if err != nil {
 			log.Printf("Unable to convert http Version string to int %s", err)
 			return []logLine{}, err
