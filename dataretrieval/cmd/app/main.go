@@ -15,12 +15,11 @@ func main() {
 	app := new(logLine)
 
 	// Initialize a new http.Server struct.
-	serverURI := fmt.Sprintf("%s:%d", *serverHost, *serverPort)
+	serverAddr := fmt.Sprintf("%s:%d", *serverHost, *serverPort)
 	srv := &http.Server{
-		Addr:    serverURI,
+		Addr:    serverAddr,
 		Handler: app.routes(),
 	}
 
 	log.Fatal(srv.ListenAndServe())
-	fmt.Println("Shutting down data retrieval service")
 }
