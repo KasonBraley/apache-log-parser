@@ -20,6 +20,12 @@ type logLine struct {
 	HTTPVersion int
 }
 
+type ResponseLog struct {
+	Method      string
+	Status      int
+	HTTPVersion int
+}
+
 func (l logLine) routes() *http.ServeMux {
 	// Register handler functions.
 	r := http.NewServeMux()
@@ -40,7 +46,7 @@ func (l logLine) retrieve(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db := connectDB()
-	logLines := retrieveAllRowsFromDB(db)
+	logLines := retrieveRowsFromDB(db)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
@@ -58,11 +64,11 @@ func connectDB() *gorm.DB {
 	return db
 }
 
-func retrieveAllRowsFromDB(db *gorm.DB) []logLine {
-	var logLines []logLine
+func retrieveRowsFromDB(db *gorm.DB) []ResponseLog {
+	var responseLog []ResponseLog
 
-	// Get all records
-	db.Find(&logLines)
+	// Get records
+	db.Model(&logLine{}).Find(&responseLog)
 
-	return logLines
+	return responseLog
 }
