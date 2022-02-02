@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -21,15 +20,25 @@ type logLine struct {
 	HTTPVersion int
 }
 
-func (l *logLine) routes() *mux.Router {
+func (l logLine) routes() *http.ServeMux {
 	// Register handler functions.
-	r := mux.NewRouter()
-	r.HandleFunc("/retrieve", l.retrieve).Methods("GET")
+	r := http.NewServeMux()
+	r.HandleFunc("/retrieve", l.retrieve)
 
 	return r
 }
 
 func (l logLine) retrieve(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/retrieve" {
+		http.NotFound(w, r)
+		return
+	}
+
+	if r.Method != http.MethodGet {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
 	db := connectDB()
 	logLines := retrieveAllRowsFromDB(db)
 
