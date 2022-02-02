@@ -50,7 +50,7 @@ func (l logLine) upload(w http.ResponseWriter, r *http.Request) {
 
 	// The file cannot be received.
 	if err != nil {
-		http.Error(w, "The uploaded file is too big. Please choose an file that's less than 1MB in size", http.StatusBadRequest)
+		http.Error(w, "File upload issue. Please upload a file that's less than 1MB in size", http.StatusBadRequest)
 		log.Println(err)
 		return
 	}
