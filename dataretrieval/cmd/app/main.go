@@ -8,9 +8,10 @@ import (
 )
 
 func main() {
-	// bring in from config file / env
+	// Define command-line flags
 	serverHost := flag.String("serverHost", "", "HTTP server host name")
 	serverPort := flag.Int("serverPort", 4001, "HTTP server network port")
+	flag.Parse()
 
 	app := new(logLine)
 
