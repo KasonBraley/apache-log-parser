@@ -13,44 +13,6 @@ export default function Home() {
     let [httpVersions, setHttpVersions] = useState()
 
     useEffect(() => {
-        async function getData() {
-            const response = await fetch("http://localhost:4001/retrieve")
-            if (response.ok) {
-                let resp = await response.json()
-                console.log(resp)
-                let methods = []
-                let statusCodes = []
-                let httpVersion = []
-
-                resp.map((log) => {
-                    methods.push(log.Method)
-                    statusCodes.push(log.Status)
-                    httpVersion.push(log.HTTPVersion)
-                })
-
-                let map = methods.reduce(function (prev, cur) {
-                    prev[cur] = (prev[cur] || 0) + 1
-                    return prev
-                }, {})
-
-                let map2 = statusCodes.reduce(function (prev, cur) {
-                    prev[cur] = (prev[cur] || 0) + 1
-                    return prev
-                }, {})
-
-                let map3 = httpVersion.reduce(function (prev, cur) {
-                    prev[cur] = (prev[cur] || 0) + 1
-                    return prev
-                }, {})
-
-                setMethods(map)
-                setStatusCodes(map2)
-                setHttpVersions(map3)
-            } else {
-                console.log("ERROR fetching the database data")
-            }
-        }
-
         getData()
     }, [])
 
@@ -62,6 +24,44 @@ export default function Home() {
         e.preventDefault()
         sendData("http://localhost:4000/upload", file)
         logInputRef.current.value = "" //Resets the file name of the file input
+    }
+
+    async function getData() {
+        const response = await fetch("http://localhost:4001/retrieve")
+        if (response.ok) {
+            let resp = await response.json()
+            console.log(resp)
+            let methods = []
+            let statusCodes = []
+            let httpVersion = []
+
+            resp.map((log) => {
+                methods.push(log.Method)
+                statusCodes.push(log.Status)
+                httpVersion.push(log.HTTPVersion)
+            })
+
+            let map = methods.reduce(function (prev, cur) {
+                prev[cur] = (prev[cur] || 0) + 1
+                return prev
+            }, {})
+
+            let map2 = statusCodes.reduce(function (prev, cur) {
+                prev[cur] = (prev[cur] || 0) + 1
+                return prev
+            }, {})
+
+            let map3 = httpVersion.reduce(function (prev, cur) {
+                prev[cur] = (prev[cur] || 0) + 1
+                return prev
+            }, {})
+
+            setMethods(map)
+            setStatusCodes(map2)
+            setHttpVersions(map3)
+        } else {
+            console.log("ERROR fetching the database data")
+        }
     }
 
     async function sendData(url, data) {
@@ -76,6 +76,7 @@ export default function Home() {
 
         if (response.ok) {
             console.log(await response.text())
+            getData()
         }
     }
 
