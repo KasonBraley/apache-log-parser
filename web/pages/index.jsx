@@ -41,27 +41,23 @@ export default function Home() {
                 httpVersion.push(log.HTTPVersion)
             })
 
-            let map = methods.reduce(function (prev, cur) {
-                prev[cur] = (prev[cur] || 0) + 1
-                return prev
-            }, {})
+            let reducedMethods = reduceData(methods)
+            let reducedStatusCodes = reduceData(statusCodes)
+            let reducedHttpVersions = reduceData(httpVersion)
 
-            let map2 = statusCodes.reduce(function (prev, cur) {
-                prev[cur] = (prev[cur] || 0) + 1
-                return prev
-            }, {})
-
-            let map3 = httpVersion.reduce(function (prev, cur) {
-                prev[cur] = (prev[cur] || 0) + 1
-                return prev
-            }, {})
-
-            setMethods(map)
-            setStatusCodes(map2)
-            setHttpVersions(map3)
+            setMethods(reducedMethods)
+            setStatusCodes(reducedStatusCodes)
+            setHttpVersions(reducedHttpVersions)
         } else {
             console.log("ERROR fetching the database data")
         }
+    }
+
+    function reduceData(arr) {
+        return arr.reduce(function (prev, cur) {
+            prev[cur] = (prev[cur] || 0) + 1
+            return prev
+        }, {})
     }
 
     async function sendData(url, data) {
@@ -101,12 +97,11 @@ export default function Home() {
                             ref={logInputRef}
                             accept=".log, .txt"
                             className="block w-full text-sm text-slate-200
-        file:mr-4 file:py-2 file:px-4
-        file:rounded-full file:border-0
-        file:text-sm file:font-semibold
-        file:bg-violet-50 file:text-violet-700
-        hover:file:bg-violet-100
-      "
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-full file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-violet-50 file:text-violet-700
+                                hover:file:bg-violet-100"
                         />
                     </label>
 
