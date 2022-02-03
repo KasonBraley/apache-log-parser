@@ -14,27 +14,24 @@ services:
   web:
     ports:
       - 3000:3000
-    # build:
-    #   context: ./web
-    image: kbraley/log-parser-web
+    build:
+      context: ./web
 
   parser:
     depends_on:
       - database
     ports:
       - 4000:4000
-    # build:
-    #   context: ./parser
-    image: kbraley/log-parser-parser
+    build:
+      context: ./parser
 
   dataretrieval:
     depends_on:
       - database
     ports:
       - 4001:4001
-    # build:
-    #   context: ./dataretrieval
-    image: kbraley/log-parser-dataretrieval
+    build:
+      context: ./dataretrieval
 
 volumes:
   pgdata:

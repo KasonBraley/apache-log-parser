@@ -1,6 +1,6 @@
 import Head from "next/head"
-import React, { useState } from "react"
-import BarChart from "../components/Chart"
+import React, { useEffect, useState } from "react"
+import BarChart from "../components/Chart/Chart"
 import Table from "../components/Table"
 
 export default function Home() {
@@ -8,14 +8,56 @@ export default function Home() {
     const [view, setView] = useState("chart")
     const logInputRef = React.useRef()
 
+    let [methods, setMethods] = useState()
+    let [statusCodes, setStatusCodes] = useState()
+    let [httpVersions, setHttpVersions] = useState()
+
+    useEffect(() => {
+        getData()
+    }, [])
+
     function handleChange(event) {
         setFile(event.target.files[0])
     }
 
     function handleSubmit(e) {
         e.preventDefault()
-        sendData("http://localhost:4002/upload", file)
+        sendData("http://localhost:4000/upload", file)
         logInputRef.current.value = "" //Resets the file name of the file input
+    }
+
+    async function getData() {
+        const response = await fetch("http://localhost:4001/retrieve")
+        if (response.ok) {
+            let resp = await response.json()
+            console.log(resp)
+            let methods = []
+            let statusCodes = []
+            let httpVersion = []
+
+            resp.map((log) => {
+                methods.push(log.Method)
+                statusCodes.push(log.Status)
+                httpVersion.push(log.HTTPVersion)
+            })
+
+            let reducedMethods = reduceData(methods)
+            let reducedStatusCodes = reduceData(statusCodes)
+            let reducedHttpVersions = reduceData(httpVersion)
+
+            setMethods(reducedMethods)
+            setStatusCodes(reducedStatusCodes)
+            setHttpVersions(reducedHttpVersions)
+        } else {
+            console.log("ERROR fetching the database data")
+        }
+    }
+
+    function reduceData(arr) {
+        return arr.reduce(function (prev, cur) {
+            prev[cur] = (prev[cur] || 0) + 1
+            return prev
+        }, {})
     }
 
     async function sendData(url, data) {
@@ -30,6 +72,7 @@ export default function Home() {
 
         if (response.ok) {
             console.log(await response.text())
+            getData()
         }
     }
 
@@ -40,17 +83,10 @@ export default function Home() {
                 <meta name="Apache Log Parser and Aggregator" />
             </Head>
 
-            <main className="flex justify-center items-center min-h-screen min-w-full space-x-60">
-                {/* <span>Example Apache Common log line</span> */}
-                {/* <p> */}
-                {/*     { */}
-                {/*         '132.128.161.195 - - [25/Jan/2022:20:08:53 -0700] "HEAD /synergize/deploy/cutting-edge/convergence HTTP/2.0" 301 14575' */}
-                {/*     } */}
-                {/* </p> */}
-
+            <main className="flex flex-col 2xl:flex 2xl:flex-row justify-center items-center min-h-screen min-w-full space-y-40 2xl:space-y-0 2xl:space-x-52">
                 <form
                     onSubmit={handleSubmit}
-                    className="border-2 border-black border-solid p-4 rounded-md shadow-xl shadow-violet-500/50"
+                    className="w-64 2xl:w-96 border-2 border-black border-solid p-4 rounded-md shadow-xl shadow-violet-500/50"
                 >
                     <h1 className="text-lg mb-4">Apache Log Upload</h1>
                     <label className="block">
@@ -61,12 +97,11 @@ export default function Home() {
                             ref={logInputRef}
                             accept=".log, .txt"
                             className="block w-full text-sm text-slate-200
-        file:mr-4 file:py-2 file:px-4
-        file:rounded-full file:border-0
-        file:text-sm file:font-semibold
-        file:bg-violet-50 file:text-violet-700
-        hover:file:bg-violet-100
-      "
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-full file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-violet-50 file:text-violet-700
+                                hover:file:bg-violet-100"
                         />
                     </label>
 
@@ -78,7 +113,7 @@ export default function Home() {
                     </button>
                 </form>
 
-                <div className="tabs tabs-boxed">
+                <div className="w-36 tabs tabs-boxed">
                     <a
                         onClick={() => setView("chart")}
                         className={view === "chart" ? "tab tab-active" : "tab"}
@@ -94,7 +129,15 @@ export default function Home() {
                 </div>
 
                 <div className="w-[600px]">
-                    {view === "chart" ? <BarChart /> : <Table />}
+                    {view === "chart" ? (
+                        <>
+                            <BarChart type="methods" data={methods} />
+                            <BarChart type="statusCodes" data={statusCodes} />
+                            <BarChart type="httpVersions" data={httpVersions} />
+                        </>
+                    ) : (
+                        <Table />
+                    )}
                 </div>
             </main>
         </>

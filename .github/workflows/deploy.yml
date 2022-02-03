@@ -1,0 +1,47 @@
+name: Build and deploy Docker images
+
+on: 
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build and push web image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./web
+          file: ./web/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/log-parser-web:latest
+
+      - name: Build and push parser image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./parser
+          file: ./parser/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/log-parser-parser:latest
+
+      - name: Build and push dataretrieval image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./dataretrieval
+          file: ./dataretrieval/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/log-parser-dataretrieval:latest

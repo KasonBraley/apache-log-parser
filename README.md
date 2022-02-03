@@ -1,6 +1,7 @@
 # apache-log-parser
 
 A microservice based full stack application to parse Apache Common Log files and aggregate the data for display in charts and tables.
+Built using Next.js, Go, and PostgreSQL.
 
 The goal is to deploy to AWS ECS.
 
@@ -15,10 +16,8 @@ Ports:
 
 - web: `3000`
 - database (**PostreSQL**): `5432`
-- registry service: `4000`
-- log service: `4001`
-- parser service: `4002`
-- data retrieval service: `4003`
+- parser service: `4000`
+- data retrieval service: `4001`
 
 ##### PostgreSQL Domain Model
 
@@ -29,22 +28,9 @@ Ports:
 - `status`: bigint
 - `http_version`: bigint
 
-##### Still left TODO (probably in order):
-
-- [ ] Figure out connection to Postgres container from the other container services (env var issues / flaky)
-- [ ] Deploy to ECS with CI/CD
-- [ ] Setup breakpoints in Tailwind for different screen sizes
-- [ ] Add authentication. Try AWS Cognito
-- [ ] Aggregate more data into the below chart. Currently it is only rendering the count of methods,
-  however all the other data is ready to be displayed as well, just needs to be hooked up to the chart.
-    - counts of status codes, http versions, etc.
-- [ ] Aggregate the data on the backend instead of the frontend to reduce traffic being sent
-- [ ] Add tests for the backend
-- [ ] Also render a table view of the same data
-
 #### Current look
 
-![website](./docs/website.png)
+![website](./docs/homepage.png)
 
 #### Wireframe
 
