@@ -3,8 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
+	"os"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func main() {
@@ -13,14 +16,24 @@ func main() {
 	serverPort := flag.Int("serverPort", 4000, "HTTP server network port")
 	flag.Parse()
 
-	app := new(logLine)
-
-	// Initialize a new http.Server struct.
 	serverAddr := fmt.Sprintf("%s:%d", *serverHost, *serverPort)
-	srv := &http.Server{
-		Addr:    serverAddr,
-		Handler: app.routes(),
+
+	if err := run(serverAddr); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
+}
+
+func run(serverAddr string) error {
+	// setup database
+	// TODO: Move this to a function
+	dsn := "host=database user=kason password=pass dbname=apache_logs port=5432 sslmode=disable TimeZone=Asia/Shanghai"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		return err
 	}
 
-	log.Fatal(srv.ListenAndServe())
+	srv := newServer(db)
+
+	return http.ListenAndServe(serverAddr, srv)
 }

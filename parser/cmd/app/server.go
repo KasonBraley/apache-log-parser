@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"log"
 	"mime/multipart"
@@ -11,9 +12,26 @@ import (
 	"strings"
 	"time"
 
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
+
+type server struct {
+	db     *gorm.DB
+	router *http.ServeMux
+}
+
+func newServer(db *gorm.DB) *server {
+	srv := &server{
+		db:     db,
+		router: http.NewServeMux(),
+	}
+	srv.routes()
+	return srv
+}
+
+func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.router.ServeHTTP(w, r)
+}
 
 // Represents some of the values of a line in a Common Apache log
 type logLine struct {
@@ -26,56 +44,69 @@ type logLine struct {
 	HTTPVersion float64
 }
 
-func (l logLine) routes() *http.ServeMux {
-	// Register handler functions.
-	r := http.NewServeMux()
-	r.HandleFunc("/upload", l.upload)
+func (s *server) handleUploadPost() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/upload" {
+			s.respond(w, r, nil, http.StatusNotFound)
+			return
+		}
+		if r.Method != http.MethodPost {
+			s.respond(w, r, "Invalid request method", http.StatusMethodNotAllowed)
+			return
+		}
 
-	return r
+		r.ParseMultipartForm(32 << 20)
+		file, fileHeader, err := r.FormFile("file")
+
+		// The file cannot be received.
+		if err != nil {
+			s.respond(w, r, "File upload issue. Please upload a file that's less than 1MB in size", http.StatusBadRequest)
+			log.Println(err)
+			return
+		}
+		defer file.Close()
+
+		content, err := readLog(fileHeader)
+		if err != nil {
+			s.respond(w, r, "Unable to open and read the log", http.StatusBadRequest)
+			log.Println(err)
+			return
+		}
+
+		logLines, err := parseLog(content)
+		if err != nil {
+			s.respond(w, r, "Unable to parse values from the log", http.StatusBadRequest)
+			log.Println(err)
+			return
+		}
+
+		s.storeData(logLines)
+
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		s.respond(w, r, "File uploaded and parsed", http.StatusCreated)
+	}
 }
 
-func (l logLine) upload(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/upload" {
-		http.NotFound(w, r)
-		return
+// respond is a helper function for responding to http requests.
+func (s *server) respond(w http.ResponseWriter, r *http.Request, data interface{}, status int) {
+	w.WriteHeader(status)
+	if data != nil {
+		err := json.NewEncoder(w).Encode(data)
+		if err != nil {
+			fmt.Println("error in respond")
+			// TODO: Handle err
+		}
 	}
+}
 
-	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-		return
+func (s *server) storeData(logLines []logLine) {
+
+	// Migrate the schema
+	s.db.AutoMigrate(&logLine{})
+
+	for _, line := range logLines {
+		s.db.Create(&line)
 	}
-
-	r.ParseMultipartForm(32 << 20)
-	file, fileHeader, err := r.FormFile("file")
-
-	// The file cannot be received.
-	if err != nil {
-		http.Error(w, "File upload issue. Please upload a file that's less than 1MB in size", http.StatusBadRequest)
-		log.Println(err)
-		return
-	}
-	defer file.Close()
-
-	content, err := readLog(fileHeader)
-	if err != nil {
-		http.Error(w, "Unable to open and read the log", http.StatusBadRequest)
-		log.Println(err)
-		return
-	}
-
-	logLines, err := parseLog(content)
-	if err != nil {
-		http.Error(w, "Unable to parse values from the log", http.StatusBadRequest)
-		log.Println(err)
-		return
-	}
-
-	db := connectDB()
-	storeData(db, logLines)
-
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.WriteHeader(http.StatusCreated)
-	fmt.Fprintf(w, "File uploaded and parsed")
 }
 
 func parseLog(lines []string) ([]logLine, error) {
@@ -142,25 +173,4 @@ func readLog(file *multipart.FileHeader) ([]string, error) {
 	}
 
 	return lines, scanner.Err()
-}
-
-func connectDB() *gorm.DB {
-	dsn := "host=database user=kason password=pass dbname=apache_logs port=5432 sslmode=disable TimeZone=Asia/Shanghai"
-
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
-
-	return db
-}
-
-func storeData(db *gorm.DB, logLines []logLine) {
-
-	// Migrate the schema
-	db.AutoMigrate(&logLine{})
-
-	for _, line := range logLines {
-		db.Create(&line)
-	}
 }
