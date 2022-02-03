@@ -1,6 +1,7 @@
 # apache-log-parser
 
 A microservice based full stack application to parse Apache Common Log files and aggregate the data for display in charts and tables.
+Built using Next.js, Go, and PostgreSQL.
 
 The goal is to deploy to AWS ECS.
 
