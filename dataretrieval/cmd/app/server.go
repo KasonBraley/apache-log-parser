@@ -81,7 +81,7 @@ func (s *server) respond(w http.ResponseWriter, r *http.Request, data interface{
 	}
 }
 
-// Represents some of the values of a line in a Common Apache log
+// logLine represents some of the values of a line in a Common Apache log.
 type logLine struct {
 	gorm.Model
 	RemoteHost  string

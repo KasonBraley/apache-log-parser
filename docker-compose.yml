@@ -23,18 +23,18 @@ services:
       - database
     ports:
       - 4000:4000
-    # build:
-    #   context: ./parser
-    image: kbraley/log-parser-parser
+    command:
+      - "-postgresHost"
+      - "database"
 
   dataretrieval:
     depends_on:
       - database
     ports:
       - 4001:4001
-    # build:
-    #   context: ./dataretrieval
-    image: kbraley/log-parser-dataretrieval
+    command:
+      - "-postgresHost"
+      - "database"
 
 volumes:
   pgdata:
