@@ -55,7 +55,12 @@ func (s *server) handleUploadPost() http.HandlerFunc {
 			return
 		}
 
-		r.ParseMultipartForm(32 << 20)
+		if err := r.ParseMultipartForm(32 << 20); err != nil {
+			s.respond(w, r, "Invalid file uploaded", http.StatusBadRequest)
+			log.Println(err)
+			return
+		}
+
 		file, fileHeader, err := r.FormFile("file")
 
 		// The file cannot be received.
@@ -80,7 +85,11 @@ func (s *server) handleUploadPost() http.HandlerFunc {
 			return
 		}
 
-		s.storeData(logLines)
+		if err := s.storeData(logLines); err != nil {
+			s.respond(w, r, "Internal server error", http.StatusInternalServerError)
+			log.Println(err)
+			return
+		}
 
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		s.respond(w, r, "File uploaded and parsed", http.StatusCreated)
@@ -99,14 +108,18 @@ func (s *server) respond(w http.ResponseWriter, r *http.Request, data interface{
 	}
 }
 
-func (s *server) storeData(logLines []logLine) {
+func (s *server) storeData(logLines []logLine) error {
 
 	// Migrate the schema
-	s.db.AutoMigrate(&logLine{})
+	if err := s.db.AutoMigrate(&logLine{}); err != nil {
+		return err
+	}
 
 	for _, line := range logLines {
 		s.db.Create(&line)
 	}
+
+	return nil
 }
 
 func parseLog(lines []string) ([]logLine, error) {
