@@ -148,7 +148,7 @@ func parseLog(lines []string) ([]logLine, error) {
 
 		re := regexp.MustCompile(`([A-Z])\w+\/\d\.\d`)
 		found := re.Find([]byte(fields[7]))
-		trimmed := strings.Trim(string(found), "HTTP/")
+		trimmed := strings.TrimPrefix(string(found), "HTTP/")
 		httpVersion, err := strconv.ParseFloat(trimmed, 64)
 
 		if err != nil {
